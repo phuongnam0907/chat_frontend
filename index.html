@@ -314,6 +314,7 @@ function fetchMessages() {
 	};
 
 	$.ajax(chat_ai).done(function(response) {
+		console.log(response);
 		let resp = response;
 		resp = resp.replace("HÀNH_ĐỘNG", "action");
 		resp = resp.replace("PHÂN_LOẠI", "category");
