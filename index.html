@@ -4,7 +4,7 @@
 	<meta charset="UTF-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 	<link rel="icon" type="image/png" href="https://diviengine.com/wp-content/uploads/2023/01/ChatGPT-Logooptimized-610x610.png" />
-	<title>Chatbot Demo v0.1</title>
+	<title>Chatbot Demo v0.2</title>
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css">
 	<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.7/css/all.css">
 	<script src="https://cdn.staticfile.org/jquery/3.6.3/jquery.min.js"></script>
@@ -244,6 +244,20 @@ var ObjContext = {
 	month: "",
 	year: "",
 }
+function clearObjContext(){
+	return ObjContext = {
+		action: "",
+		category: "",
+		phone_number: "",
+		user_id: "",
+		user_name: "",
+		address: "",
+		device_id: "",
+		index_value: "",
+		month: "",
+		year: "",
+	}
+}
 
 let messages = "";
 let _action = "";
@@ -270,20 +284,22 @@ const ActionStatus = {
 	instruction_payment_methods: 9,
 	request_invoices: 10,
 	instruction_IndexWater_report: 11,
-	explain_bill_period: 12,
-	request_IndexWater_date: 13,
-	explain_temporary_calculate: 14,
-	research_water_price: 15,
-	explain_business_water_price: 16,
-	research_water_tax: 17,
-	research_service_drainage: 18,
-	research_environmental_fee: 19,
-	request_instruction_NewWatch_install: 20,
-	explain_NewWatch_install: 21,
-	explain_NewWatch_install_fee: 22,
-	change_information_contract: 23,
-	provide_customer_information: 24,
-	forget_personal_information:25
+	instruction_IndexWater_input:12,
+	explain_bill_period: 13,
+	request_IndexWater_date: 14,
+	explain_temporary_calculate: 15,
+	research_water_price: 16,
+	explain_business_water_price: 17,
+	research_water_tax: 18,
+	research_service_drainage: 19,
+	research_environmental_fee: 20,
+	request_instruction_NewWatch_install: 21,
+	explain_NewWatch_install: 22,
+	explain_NewWatch_install_fee: 23,
+	change_information_contract: 24,
+	provide_customer_information: 25,
+	forget_personal_information:26,
+
 }
 const InformationStatus = {
 	idle: 0,
@@ -301,10 +317,10 @@ const InformationStatus = {
 	done_info_request_area_refund:12,
 	info_request_invoices:13,
 	info_instruction_IndexWater_report:14,
-	done_info_instruction_IndexWater_report:15,
+	done_info_instruction_IndexWater_report_input:15,
 	info_request_instruction_NewWatch_install:16,
 	info_change_information_contract:17,
-	
+	info_request_IndexWater_date:18,
 }
 let _InfoStatus = InformationStatus.idle;
 
@@ -342,10 +358,168 @@ userInput.on("keydown", (event) => {
         userInput.prop("selectionEnd", cursorPosition + 1);
     }
 });
+function isValidCustomerID(customerID) {
+	// user id with 7 or 8 items with 1 character or not
+	let makhachhang =  (/^[0-9]*[a-zA-Z]?[0-9]*$/.test(customerID) && (customerID.length === 7 || customerID.length === 8))? ("mã khách hàng: " + customerID) : false;
+	return makhachhang;
+}
+function isValidPhoneNumber(phoneNumber) {
+	// check phone number with 10 number with +84 == 0 follow VN region
+	let sodienthoai = (/^\+?84\d{9}$/.test(phoneNumber) || /^0\d{9}$/.test(phoneNumber))? ("số điện thoại: " + phoneNumber) : false;
+	return sodienthoai;
+}
+function isValidCustomerName(customerName) {
+	// user name with characters without number
+	let tenkhachhang = (/^[^0-9]+$/.test(customerName))? ("tên khách hàng: " + customerName) : false;
+	return tenkhachhang;
+}
+function isValidAddress(address) {
+	// address with characters and numbers
+	let diachi = (/[A-Za-z].*\d|\d.*[A-Za-z]/.test(address))? ("địa chỉ: " + address) : false;
+	return diachi;
+}
+function isValidIndexWater(index_value) {
+	// check index value with 3 numbers
+	let chisonuoc = (/^\d{3}$/.test(index_value))? ("chỉ số nước: " + index_value) : false;
+	return chisonuoc;
+}
+function isValidWatchID(watch_id) {
+  // check watch id with 5 item without space and symbol
+   let madongho = (/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z0-9]{5}$/.test(watch_id))? ("mã đồng hồ: "+watch_id) : false;
+   return madongho;
+}
+function validateAndExtractInfo(inputString, _InfoStatus) {
+	// split string
+	const parts = inputString.split(',');
+	// handle with having space
+	const processedParts = parts.map(part => part.trim());
 
+	let temp_customerID = "";
+	let temp_customerName = "";
+	let temp_phoneNumber = "";
+	let temp_address = "";
+	let temp_index_water = "";
+	let temp_device_id = "";
+    // Duyệt qua từng phần và xác định loại thông tin
+	for (const part of processedParts) {
+		if(isValidCustomerID(part)){
+			temp_customerID = part;
+			//console.log(temp_customerID);
+		}
+		else if (isValidPhoneNumber(part)) {
+			temp_phoneNumber = part;
+			//console.log(temp_phoneNumber);
+		}
+		else if (isValidCustomerName(part)) {
+			temp_customerName = part;
+			//console.log(temp_customerName);
+		}
+		else if(isValidIndexWater(part)){
+			temp_index_water = part;
+			//console.log(temp_index_water);
+		}
+		else if(isValidWatchID(part)) {
+			temp_device_id = part;
+			//console.log(temp_device_id);
+		}
+		else if (isValidAddress(part)) {
+			temp_address = part;
+			//console.log(temp_address)
+		}
+
+  	}
+  	// check value
+  	const isValidInfo = {
+		customerID: temp_customerID,
+		phoneNumber: temp_phoneNumber,
+		customerName: temp_customerName,
+		index_water: temp_index_water,
+		device_id: temp_device_id,
+		address: temp_address
+  	};
+	if(_InfoStatus == InformationStatus.info_request_instruction_NewWatch_install){
+		if (isValidInfo.customerName && isValidInfo.phoneNumber  && isValidInfo.address) {
+    		return isValidInfo;
+    	}
+		else {
+			return false;
+		}
+	}
+	else if(_InfoStatus == InformationStatus.info_change_information_contract){
+		if (isValidInfo.customerID && isValidInfo.address) {
+    		return isValidInfo;
+    	}
+		else {
+			return false;
+		}
+	}
+
+}
+
+function checkDB_CustomerID(_CustomerID){
+	return (_CustomerID == "1984500")?true:false;
+}
+
+
+var result = "";
+function getCheckCustomer(_user_id){
+	result = "";
+	_month = String(_date.getMonth() + 1);
+	_year = String(_date.getFullYear());
+	var water_info = {
+		url: "http://lpnserver.net:51087/bwaco?id=" + _user_id + "&m=" + _month + "&y=" + _year,
+		method: "GET",
+		timeout: 5000,
+		async: false
+	}
+	$.ajax(water_info).done(function(res) {
+		let len = res.length;
+		res.forEach(element => {
+			result += "Vâng, "+"(ID-" + element["idkh"] + ") Tên Khách Hàng: " + element["tenKhachHang"] + ", Mã KH: " + element["maKhachHang"]+ ".\n\n";
+		});
+	});
+}
 function fetchMessages() {
+	if(_InfoStatus == InformationStatus.info_reflect || _InfoStatus == InformationStatus.info_request_watch_repair ||
+	   _InfoStatus == InformationStatus.info_request_pipe_repair || _InfoStatus == InformationStatus.info_request_IndexWatch_check_explain ||
+	   _InfoStatus == InformationStatus.info_info_request_valve_repair || _InfoStatus == InformationStatus.info_request_area_refund ||
+	   _InfoStatus == InformationStatus.info_request_invoices || _InfoStatus == InformationStatus.info_instruction_IndexWater_report ||
+	   _InfoStatus == InformationStatus.info_request_IndexWater_date){
+		if(isValidCustomerID(messages) != false){
+			messages = isValidCustomerID(messages);
+		}
+	}
+	else if(_InfoStatus == InformationStatus.done_info_reflect || _InfoStatus == InformationStatus.done_info_request_watch_repair ||
+	   _InfoStatus == InformationStatus.done_info_request_pipe_repair || _InfoStatus == InformationStatus.done_info_request_IndexWatch_check_explain ||
+	   _InfoStatus == InformationStatus.done_info_info_request_valve_repair || _InfoStatus == InformationStatus.done_info_request_area_refund ||
+	   _InfoStatus == InformationStatus.done_info_request_invoices || _InfoStatus == InformationStatus.done_info_instruction_IndexWater_report ||
+	   _InfoStatus == InformationStatus.done_info_request_IndexWater_date){
+		if(isValidPhoneNumber(messages) != false){
+			messages = isValidPhoneNumber(messages);
+		}
+	}
+	else if(_InfoStatus == InformationStatus.info_request_instruction_NewWatch_install){
+		let validInfo = validateAndExtractInfo(messages, _InfoStatus);
+		if (validInfo != false){
+			validInfo = isValidCustomerName(validInfo.customerName) + ", " + isValidPhoneNumber(validInfo.phoneNumber) + ", " + isValidAddress(validInfo.address);
+			messages = validInfo;
+		}
+	}
+	else if(_InfoStatus == InformationStatus.done_info_instruction_IndexWater_report_input){
+		if(isValidIndexWater(messages,) != false){
+			messages = isValidIndexWater(messages);
+		}
+	}
+	else if(_InfoStatus == InformationStatus.info_change_information_contract){
+		let validInfo = validateAndExtractInfo(messages, _InfoStatus);
+		if (validInfo != false){
+			validInfo = isValidCustomerID(validInfo.customerID) + ", " + isValidAddress(validInfo.address);
+			messages = validInfo;
+		}
+	}
+	console.log(messages);
 	var chat_ai = {
-		url: "http://lpnserver.net:51087/chat/url?m=ft:gpt-3.5-turbo-0613:personal::8iZPoh9X&k=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&c=" + messages,
+		url: "http://lpnserver.net:51087/chat/url?m=ft:gpt-3.5-turbo-0613:personal::8iih1C7y&k=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&c=" + messages,
 		method: "GET",
 		timeout: 5000
 	};
@@ -401,7 +575,7 @@ function fetchMessages() {
 			_month = json_data["month"];
 			ObjContext["month"]=json_data["month"];
 		}
-		if (json_data["year"] != "null"){ 
+		if (json_data["year"] != "null"){
 			_year = json_data["year"];
 			ObjContext["year"] = json_data["year"];
 		}
@@ -418,6 +592,7 @@ function fetchMessages() {
 		else if (_action == "Hướng dẫn về các hình thức thanh toán") _ActionStatus = ActionStatus.instruction_payment_methods;
 		else if (_action == "Yêu cầu liên quan đến hóa đơn") _ActionStatus = ActionStatus.request_invoices;
 		else if (_action == "Hướng dẫn báo chỉ số nước") _ActionStatus = ActionStatus.instruction_IndexWater_report;
+		else if (_action == "Hướng dẫn nhập dãy chỉ số nước") _ActionStatus = ActionStatus.instruction_IndexWater_input;
 		else if (_action == "Giải thích kỳ hoá đơn chỉ số nước") _ActionStatus = ActionStatus.explain_bill_period;
 		else if (_action == "Yêu cầu ngày ghi chỉ số nước") _ActionStatus = ActionStatus.request_IndexWater_date;
 		else if (_action == "Giải thích tạm tính") _ActionStatus = ActionStatus.explain_temporary_calculate;
@@ -433,8 +608,8 @@ function fetchMessages() {
 		else if (_action == "Cung cấp thông tin khách hàng") _ActionStatus = ActionStatus.provide_customer_information;
 		else if (_action == "Quên thông tin cá nhân") _ActionStatus = ActionStatus.forget_personal_information;
 
-		
-		let result = "";
+
+		result = "";
 		console.log("Check action: " + _ActionStatus);
 		switch (_ActionStatus) {
 			case ActionStatus.idle:
@@ -445,7 +620,7 @@ function fetchMessages() {
 			case ActionStatus.reflect_water_quality:
 				if(_category == "Nước đục" || _category == "Nước có mùi")
 				{
-					result = "Anh/chị vui lòng cung cấp mã khách hàng (VD: mkh:1984500)";
+					result = "Anh/chị vui lòng cung cấp mã khách hàng (VD:1984500)";
 					_InfoStatus = InformationStatus.info_reflect;
 				}
 				else if (_category == "Nước có bọt trắng")
@@ -456,28 +631,28 @@ function fetchMessages() {
 			case ActionStatus.reflect_water_supply:
 				if(_category == "Không có nước" || _category == "Nước yếu")
 				{
-					result = "Anh/chị vui lòng cung cấp mã khách hàng (VD: mkh:1984500)";
+					result = "Anh/chị vui lòng cung cấp mã khách hàng (VD:1984500)";
 					_InfoStatus = InformationStatus.info_reflect;
 				}
 				break;
 			case ActionStatus.request_watch_repair:
-				result = "Anh/chị vui lòng cung cấp mã khách hàng (VD: mkh:1984500)";
+				result = "Anh/chị vui lòng cung cấp mã khách hàng (VD:1984500)";
 				_InfoStatus = InformationStatus.info_request_watch_repair;
 				break;
 			case ActionStatus.request_pipe_repair:
-				result = "Anh/chị vui lòng cung cấp mã khách hàng (VD: mkh:1984500)";
+				result = "Anh/chị vui lòng cung cấp mã khách hàng (VD:1984500)";
 				_InfoStatus = InformationStatus.info_request_pipe_repair;
 				break;
 			case ActionStatus.request_IndexWatch_check_explain:
-				result = "Anh/chị vui lòng cung cấp mã khách hàng (VD: mkh:1984500)";
+				result = "Anh/chị vui lòng cung cấp mã khách hàng (VD:1984500)";
 				_InfoStatus = InformationStatus.info_request_IndexWatch_check_explain;
 				break;
 			case ActionStatus.request_valve_repair:
-				result = "Anh/chị vui lòng cung cấp mã khách hàng (VD: mkh:1984500)";
+				result = "Anh/chị vui lòng cung cấp mã khách hàng (VD:1984500)";
 				_InfoStatus = InformationStatus.info_request_valve_repair;
 				break;
 			case ActionStatus.request_area_refund:
-				result = "Anh/chị vui lòng cung cấp mã khách hàng (VD: mkh:1984500)";
+				result = "Anh/chị vui lòng cung cấp mã khách hàng (VD:1984500)";
 				_InfoStatus = InformationStatus.info_request_area_refund;
 				break;
 			case ActionStatus.instruction_payment_methods:
@@ -487,7 +662,7 @@ function fetchMessages() {
 				break;
 			case ActionStatus.request_invoices:
 				if (ObjContext["user_id"] == ""){
-					result = "Anh/chị vui lòng cung cấp mã khách hàng (VD: mkh:1984500)";
+					result = "Anh/chị vui lòng cung cấp mã khách hàng (VD:1984500)";
 					_InfoStatus = InformationStatus.info_request_invoices;
 				}
 				else{
@@ -533,23 +708,22 @@ function fetchMessages() {
 						});
 					});
 				}
-				
+
 				break;
 			case ActionStatus.instruction_IndexWater_report:
-				if(_category == "Chỉ số nước"){
-					result = "Anh/chị vui lòng cung cấp mã khách hàng (VD: mkh:1984500)";
-					_InfoStatus = InformationStatus.info_instruction_IndexWater_report;
-				}
-				else if(_category == "Dãy số chỉ số nước"){
-					result = "Anh/Chị vui lòng nhập dãy số màu đen trên mặt đồng hồ nước. Xin cảm ơn!";
-					_InfoStatus = InformationStatus.done_info_instruction_IndexWater_report;
-				}
+				result = "Anh/chị vui lòng cung cấp mã khách hàng (VD:1984500)";
+				_InfoStatus = InformationStatus.info_instruction_IndexWater_report;
+				break;
+			case ActionStatus.instruction_IndexWater_input:
+				result = "Anh/Chị vui lòng nhập dãy số màu đen trên mặt đồng hồ nước. Xin cảm ơn!";
+				_InfoStatus = InformationStatus.done_info_instruction_IndexWater_report_input;
 				break;
 			case ActionStatus.explain_bill_period:
 				result = "Cảm ơn anh, chị đã gọi điện tới tổng đài, kỳ hóa đơn được tính từ ngày ghi chỉ số nước của tháng này tới ngày ghi chỉ số nước của tháng sau ạ.";
 				break;
 			case ActionStatus.request_IndexWater_date:
-				result = "Ngày ghi chỉ số của anh, chị là...(Chưa có API để request)";
+				result = "Anh/chị vui lòng cung cấp mã khách hàng (VD:1984500)";
+				_InfoStatus = InformationStatus.info_request_IndexWater_date;
 				break;
 			case ActionStatus.explain_temporary_calculate:
 				result = "Dạ. Khi đến ngày ghi chỉ số nước, nếu nhân viên không tiếp cận được đồng hồ nước do nhà đóng cửa, nhà có trẻ nhỏ, người lớn tuổi không cung cấp được chỉ số nước thì Công ty cấp nước Bà Rịa vũng tàu sẽ tạm tính chi phí sử dụng nước bằng trung bình 3 kỳ gần nhất.";
@@ -580,8 +754,8 @@ function fetchMessages() {
 				result = "Nếu giấy tờ nhà đất hợp lệ, BWACO sẽ lắp miễn phí 1 đồng hồ dưới 10m ống. Các trường hợp tính phí khi lắp đồng hồ mới sẽ căn cứ vào khảo sát thự tế và chiết tính cụ thể ạ.";
 				break;
 			case ActionStatus.change_information_contract:
-				result = "Dạ Anh/chị vui lòng cung cấp mã khách hàng hoặc địa chỉ của ĐH nước cần thay đổi thông tin. (VD: mkh: 1984500, dc: 23 Thuỳ Vân Tp Vũng Tàu)";
-				_InfoStatus = InformationStatus.change_information_contract;
+				result = "Dạ Anh/chị vui lòng cung cấp mã khách hàng hoặc địa chỉ của ĐH nước cần thay đổi thông tin. (VD: 1984500, 23 Thuỳ Vân TP.Vũng Tàu)";
+				_InfoStatus = InformationStatus.info_change_information_contract;
 				break;
 			case ActionStatus.provide_customer_information:
 				if (_InfoStatus == InformationStatus.done_info_reflect){
@@ -609,206 +783,173 @@ function fetchMessages() {
 					_InfoStatus = InformationStatus.idle;
 
 				}
-				else if (_InfoStatus == InformationStatus.done_info_instruction_IndexWater_report){
+				else if (_InfoStatus == InformationStatus.done_info_instruction_IndexWater_report_input){
 					result = "Thông tin của anh/chị đã được ghi nhận. Sẽ có nhân viên của BWACO liên hệ với anh/chị trong thời gian sớm nhất có thể. Xin cảm ơn!";
 					_InfoStatus = InformationStatus.idle;
 				}
 				else if(_InfoStatus == InformationStatus.info_reflect){
-					_InfoStatus = InformationStatus.done_info_reflect;
-					if (_month == "") _month = String(_date.getMonth() + 1);
-					if (_year == "") _year = String(_date.getFullYear());
-					var water_info = {
-						url: "http://lpnserver.net:51087/bwaco?id=" + _user_id + "&m=" + _month + "&y=" + _year,
-						method: "GET",
-						timeout: 5000,
-						async: false
+					if(checkDB_CustomerID(_user_id)){
+						_InfoStatus = InformationStatus.done_info_reflect;
+						getCheckCustomer(_user_id);
+						result += "Anh/chị vui lòng cho xin số điện thoại để liên hệ. (VD:0123456789)";
 					}
-					$.ajax(water_info).done(function(res) {
-						let len = res.length;
-						res.forEach(element => {
-							result += "Vâng, "+"(ID-" + element["idkh"] + ") Tên Khách Hàng: " + element["tenKhachHang"] + ", Mã KH: " + element["maKhachHang"]+ ".";
-							result += " Anh/chị vui lòng cho xin số điện thoại để liên hệ. (VD: sdt:012345678)"
-							
-						});
-					});
+					else{
+						result += "Mã khách hàng không hợp lệ, anh/chị vui lòng kiểm tra lại";
+						clearObjContext();
+					}
 				}
 				else if(_InfoStatus == InformationStatus.info_request_watch_repair){
-					_InfoStatus = InformationStatus.done_info_request_watch_repair;
-					if (_month == "") _month = String(_date.getMonth() + 1);
-					if (_year == "") _year = String(_date.getFullYear());
-					var water_info = {
-						url: "http://lpnserver.net:51087/bwaco?id=" + _user_id + "&m=" + _month + "&y=" + _year,
-						method: "GET",
-						timeout: 5000,
-						async: false
+					if(checkDB_CustomerID(_user_id)){
+						_InfoStatus = InformationStatus.done_info_request_watch_repair;
+						getCheckCustomer(_user_id);
+						result += "Anh/chị vui lòng cho xin số điện thoại để liên hệ. (VD:0123456789)";
 					}
-					$.ajax(water_info).done(function(res) {
-						let len = res.length;
-						res.forEach(element => {
-							result += "Vâng, "+"(ID-" + element["idkh"] + ") Tên Khách Hàng: " + element["tenKhachHang"] + ", Mã KH: " + element["maKhachHang"]+ ".";
-							result += " Anh/chị vui lòng cho xin số điện thoại để liên hệ. (VD: sdt:012345678)"
-							
-						});
-					});
+					else{
+						result += "Mã khách hàng không hợp lệ, anh/chị vui lòng kiểm tra lại";
+						clearObjContext();
+					}
 				}
 				else if(_InfoStatus == InformationStatus.info_request_IndexWatch_check_explain){
-					_InfoStatus = InformationStatus.done_info_request_IndexWatch_check_explain;
-					if (_month == "") _month = String(_date.getMonth() + 1);
-					if (_year == "") _year = String(_date.getFullYear());
-					var water_info = {
-						url: "http://lpnserver.net:51087/bwaco?id=" + _user_id + "&m=" + _month + "&y=" + _year,
-						method: "GET",
-						timeout: 5000,
-						async: false
+					if(checkDB_CustomerID(_user_id)){
+						_InfoStatus = InformationStatus.done_info_request_IndexWatch_check_explain;
+						getCheckCustomer(_user_id);
+						result += "Anh/chị vui lòng cho xin số điện thoại để liên hệ. (VD:0123456789)";
 					}
-					$.ajax(water_info).done(function(res) {
-						let len = res.length;
-						res.forEach(element => {
-							result += "Vâng, "+"(ID-" + element["idkh"] + ") Tên Khách Hàng: " + element["tenKhachHang"] + ", Mã KH: " + element["maKhachHang"]+ ".";
-							result += " Anh/chị vui lòng cho xin số điện thoại để liên hệ. (VD: sdt:012345678)"
-							
-						});
-					});
+					else{
+						result += "Mã khách hàng không hợp lệ, anh/chị vui lòng kiểm tra lại";
+						clearObjContext();
+					}
 				}
 				else if(_InfoStatus == InformationStatus.info_request_pipe_repair){
-					_InfoStatus = InformationStatus.done_info_request_pipe_repair;
-					if (_month == "") _month = String(_date.getMonth() + 1);
-					if (_year == "") _year = String(_date.getFullYear());
-					var water_info = {
-						url: "http://lpnserver.net:51087/bwaco?id=" + _user_id + "&m=" + _month + "&y=" + _year,
-						method: "GET",
-						timeout: 5000,
-						async: false
+					if(checkDB_CustomerID(_user_id)){
+						_InfoStatus = InformationStatus.done_info_request_pipe_repair;
+						getCheckCustomer(_user_id);
+						result += "Anh/chị vui lòng cho xin số điện thoại để liên hệ. (VD:0123456789)";
 					}
-					$.ajax(water_info).done(function(res) {
-						let len = res.length;
-						res.forEach(element => {
-							result += "Vâng, "+"(ID-" + element["idkh"] + ") Tên Khách Hàng: " + element["tenKhachHang"] + ", Mã KH: " + element["maKhachHang"]+ ".";
-							result += " Anh/chị vui lòng cho xin số điện thoại để liên hệ. (VD: sdt:012345678)"
-							
-						});
-					});
+					else{
+						result += "Mã khách hàng không hợp lệ, anh/chị vui lòng kiểm tra lại";
+						clearObjContext();
+					}
 				}
 				else if(_InfoStatus == InformationStatus.info_request_valve_repair){
-					_InfoStatus = InformationStatus.done_info_request_valve_repair;
-					if (_month == "") _month = String(_date.getMonth() + 1);
-					if (_year == "") _year = String(_date.getFullYear());
-					var water_info = {
-						url: "http://lpnserver.net:51087/bwaco?id=" + _user_id + "&m=" + _month + "&y=" + _year,
-						method: "GET",
-						timeout: 5000,
-						async: false
+					if(checkDB_CustomerID(_user_id)){
+						_InfoStatus = InformationStatus.done_info_request_valve_repair;
+						getCheckCustomer(_user_id);
+						result += "Anh/chị vui lòng cho xin số điện thoại để liên hệ. (VD:0123456789)";
 					}
-					$.ajax(water_info).done(function(res) {
-						let len = res.length;
-						res.forEach(element => {
-							result += "Vâng, "+"(ID-" + element["idkh"] + ") Tên Khách Hàng: " + element["tenKhachHang"] + ", Mã KH: " + element["maKhachHang"]+ ".";
-							result += " Anh/chị vui lòng cho xin số điện thoại để liên hệ. (VD: sdt:012345678)"
-							
-						});
-					});
+					else{
+						result += "Mã khách hàng không hợp lệ, anh/chị vui lòng kiểm tra lại";
+						clearObjContext();
+					}
 				}
 				else if(_InfoStatus == InformationStatus.info_request_area_refund){
-					_InfoStatus = InformationStatus.done_info_request_area_refund;
-					if (_month == "") _month = String(_date.getMonth() + 1);
-					if (_year == "") _year = String(_date.getFullYear());
-					var water_info = {
-						url: "http://lpnserver.net:51087/bwaco?id=" + _user_id + "&m=" + _month + "&y=" + _year,
-						method: "GET",
-						timeout: 5000,
-						async: false
+					if(checkDB_CustomerID(_user_id)){
+						_InfoStatus = InformationStatus.done_info_request_area_refund;
+						getCheckCustomer(_user_id);
+						result += "Anh/chị vui lòng cho xin số điện thoại để liên hệ. (VD:0123456789)";
 					}
-					$.ajax(water_info).done(function(res) {
-						let len = res.length;
-						res.forEach(element => {
-							result += "Vâng, "+"(ID-" + element["idkh"] + ") Tên Khách Hàng: " + element["tenKhachHang"] + ", Mã KH: " + element["maKhachHang"]+ ".";
-							result += " Anh/chị vui lòng cho xin số điện thoại để liên hệ. (VD: sdt:012345678)"
-							
-						});
-					});
+					else{
+						result += "Mã khách hàng không hợp lệ, anh/chị vui lòng kiểm tra lại";
+						clearObjContext();
+					}
 				}
 				else if (_InfoStatus == InformationStatus.info_request_invoices){
-					_InfoStatus = InformationStatus.idle;
-					//if (_user_id == "") _user_id = "1984500";
-					if (ObjContext["month"] == "") _month = String(_date.getMonth() + 1);
-					if (ObjContext["year"] == "") _year = String(_date.getFullYear());
-					//console.log("Check month" +_month);
+					if(checkDB_CustomerID(_user_id)){
+						_InfoStatus = InformationStatus.idle;
+						if (ObjContext["month"] == "") _month = String(_date.getMonth() + 1);
+						if (ObjContext["year"] == "") _year = String(_date.getFullYear());
 
-					if (ObjContext["month"] == "-1") {
-						let cur_month = _date.getMonth() + 1;
-						let cur_year = _date.getFullYear();
-						if (cur_month == 1) {
-							cur_month = 12;
-							cur_year = cur_year - 1;
-						} else {
-							cur_month = cur_month - 1;
-						}
-						_month = String(cur_month);
-						_year = String(cur_year);
-					}
-					if ((parseInt(_month) > (_date.getMonth() + 1)) && ((_year == "") || (parseInt(_year) >= _date.getFullYear()))) {
-						_year = String(_date.getFullYear() - 1);
-					}
-					var water_info = {
-						url: "http://lpnserver.net:51087/bwaco?id=" + _user_id + "&m=" + _month + "&y=" + _year,
-						method: "GET",
-						timeout: 5000,
-						async: false
-					}
-					$.ajax(water_info).done(function(res) {
-						let len = res.length;
-						result = "Hiện tại anh/chị có " + len + " hoá đơn tiền nước, chi tiết như sau:\n\n";
-						res.forEach(element => {
-							result += "(ID-" + element["idkh"] + ") Tên Khách Hàng: " + element["tenKhachHang"] + ", Mã KH: " + element["maKhachHang"] + "\n\n";
-							result += "* Hoá đơn nước tháng " + String(element["thang"]) + " năm " + String(element["nam"]) + "\n\n";
-							result += "* Chỉ số đầu: " + String(element["chiSoDau"]) + ", chỉ số cuối: " + String(element["chiSoCuoi"]) + ", tổng khối lượng: " + String(element["khoiluong"]) + "\n\n";
-							result += "* Tổng tiền: " + element["tongTien"] + "đ\n\n";
-							if (element["hetNo"] == true) {
-								result += "* Tình trạng hoá đơn: ĐÃ THANH TOÁN";
+						if (ObjContext["month"] == "-1") {
+							let cur_month = _date.getMonth() + 1;
+							let cur_year = _date.getFullYear();
+							if (cur_month == 1) {
+								cur_month = 12;
+								cur_year = cur_year - 1;
 							} else {
-								result += "* Tình trạng hoá đơn: CHƯA THANH TOÁN";
+								cur_month = cur_month - 1;
 							}
+							_month = String(cur_month);
+							_year = String(cur_year);
+						}
+						if ((parseInt(_month) > (_date.getMonth() + 1)) && ((_year == "") || (parseInt(_year) >= _date.getFullYear()))) {
+							_year = String(_date.getFullYear() - 1);
+						}
+						var water_info = {
+							url: "http://lpnserver.net:51087/bwaco?id=" + _user_id + "&m=" + _month + "&y=" + _year,
+							method: "GET",
+							timeout: 5000,
+							async: false
+						}
+						$.ajax(water_info).done(function(res) {
+							let len = res.length;
+							result = "Hiện tại anh/chị có " + len + " hoá đơn tiền nước, chi tiết như sau:\n\n";
+							res.forEach(element => {
+								result += "(ID-" + element["idkh"] + ") Tên Khách Hàng: " + element["tenKhachHang"] + ", Mã KH: " + element["maKhachHang"] + "\n\n";
+								result += "* Hoá đơn nước tháng " + String(element["thang"]) + " năm " + String(element["nam"]) + "\n\n";
+								result += "* Chỉ số đầu: " + String(element["chiSoDau"]) + ", chỉ số cuối: " + String(element["chiSoCuoi"]) + ", tổng khối lượng: " + String(element["khoiluong"]) + "\n\n";
+								result += "* Tổng tiền: " + element["tongTien"] + "đ\n\n";
+								if (element["hetNo"] == true) {
+									result += "* Tình trạng hoá đơn: ĐÃ THANH TOÁN";
+								} else {
+									result += "* Tình trạng hoá đơn: CHƯA THANH TOÁN";
+								}
+							});
 						});
-					});
+					}
+					else {
+						result += "Mã khách hàng không hợp lệ, anh/chị vui lòng kiểm tra lại";
+						ObjContext["user_id"] = "";
+					}
 				}
 				else if(_InfoStatus == InformationStatus.info_instruction_IndexWater_report){
-					_InfoStatus = InformationStatus.done_info_instruction_IndexWater_report;
-					if (_month == "") _month = String(_date.getMonth() + 1);
-					if (_year == "") _year = String(_date.getFullYear());
-					var water_info = {
-						url: "http://lpnserver.net:51087/bwaco?id=" + _user_id + "&m=" + _month + "&y=" + _year,
-						method: "GET",
-						timeout: 5000,
-						async: false
+					if(checkDB_CustomerID(_user_id)){
+						_InfoStatus = InformationStatus.done_info_instruction_IndexWater_report_input;
+						getCheckCustomer(_user_id);
+						result += " Anh/chị nhắn giúp dãy số trên mặt đồng hồ nước và hình ảnh chụp mặt đồng hồ. Hệ thống sẽ kiểm tra và nhập chỉ số cho nhà mình. (VD: 678)";
 					}
-					$.ajax(water_info).done(function(res) {
-						let len = res.length;
-						res.forEach(element => {
-							result += "Vâng, "+"(ID-" + element["idkh"] + ") Tên Khách Hàng: " + element["tenKhachHang"] + ", Mã KH: " + element["maKhachHang"]+ ".";
-							result += " Anh/chị nhắn giúp dãy số trên mặt đồng hồ nước và hình ảnh chụp mặt đồng hồ. Hệ thống sẽ kiểm tra và nhập chỉ số cho nhà mình. (VD: cs: 012345678)"
-						});
-					});
+					else{
+						result += "Mã khách hàng không hợp lệ, anh/chị vui lòng kiểm tra lại";
+						clearObjContext();
+					}
+				}
+				else if(_InfoStatus == InformationStatus.info_request_IndexWater_date){
+					if(checkDB_CustomerID(_user_id)){
+						_InfoStatus = InformationStatus.idle;
+						getCheckCustomer(_user_id);
+						result += " Ngày ghi chỉ số của anh/chị là....";
+					}
+					else{
+						result += "Mã khách hàng không hợp lệ, anh/chị vui lòng kiểm tra lại";
+						clearObjContext();
+					}
 				}
 				else if(_InfoStatus == InformationStatus.info_request_instruction_NewWatch_install){
 					_InfoStatus = InformationStatus.idle;
-					result += "Vâng, Tên Khách Hàng: " + _user_name + ", Số điện thoại: " + _phone_number + ",Địa chỉ: " + _address +".";
+					result += "Vâng, Tên Khách Hàng: " + _user_name + ", Số điện thoại: " + _phone_number + ", Địa chỉ: " + _address +".";
 					result += "Thông tin của Anh/chị đã được hệ thống ghi nhận, Anh/chị vui lòng đợi bộ phận chuyên trách liên hệ lại sau. Xin cảm ơn!";
 				}
-				else if(_InfoStatus == InformationStatus.change_information_contract){
-					_InfoStatus = InformationStatus.idle;
-					result += "Vâng, Mã Khách Hàng: " + _user_id + ",Địa chỉ: " + _address +".";
-					result += "Yêu cầu thay đổi thông tin trên HĐ cấp nước của Anh/chị tại địa chỉ " + _address + "đã được hệ thống ghi nhận, Anh/chị vui lòng đợi bộ phận chuyên trách liên hệ lại sau. Xin cảm ơn!";
+				else if(_InfoStatus == InformationStatus.info_change_information_contract){
+					if(checkDB_CustomerID(_user_id)){
+						_InfoStatus = InformationStatus.idle;
+						result += "Vâng, Mã Khách Hàng: " + _user_id + ", Địa chỉ: " + _address +".";
+						result += "Yêu cầu thay đổi thông tin trên HĐ cấp nước của Anh/chị tại địa chỉ " + _address + " đã được hệ thống ghi nhận, Anh/chị vui lòng đợi bộ phận chuyên trách liên hệ lại sau. Xin cảm ơn!";
+					}
+					else{
+						result += "Mã khách hàng không hợp lệ, anh/chị vui lòng kiểm tra lại";
+						clearObjContext();
+					}
+
 				}
 				break;
 			case ActionStatus.forget_personal_information:
 				if(_category == "Quên mã khách hàng"){
-					result += "Khách hàng vui lòng cho biết tên đồng hồ nước(tên chủ hộ) hoặc địa chỉ của đồng hồ.(VD: kh:Nguyễn Văn A, dc: 23 Thuỳ Vân Tp Vũng Tàu";
+					result += "Khách hàng vui lòng cho biết tên chủ hộ(tên đồng hồ nước) hoặc địa chỉ của đồng hồ.(VD: Nguyễn Văn A, 23 Thuỳ Vân TP.Vũng Tàu";
 				}
 				else if(_category == "Quên tên khách hàng" || _category == "Quên địa chỉ"){
-					result += "Khách hàng vui lòng cho biết mã đồng hồ nước.(VD: cs:1234) ";
+					result += "Khách hàng vui lòng cho biết mã đồng hồ nước.(VD: 234) ";
 				}
 				else if(_category == "Quên mã đồng hồ"){
-					result += "Quý khách vui lòng gọi điện trực tiếp đến tổng đài để nhận được tư vấn."
+					result += "Quý khách vui lòng gọi trực tiếp đến tổng đài để nhận được tư vấn."
 				}
 				break;
 		}
