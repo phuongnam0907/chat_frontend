@@ -1,21 +1,22 @@
 import {ActionStatus, ForgetInformationStatus,InformationStatus, PushContextStatus, getActionStatus,
 		flag_rememberInformation } from './Controller/fsmStatus.js' ;
 import {objectContext, clearObjContext, messageFirst_UserID, messageSecond_Phone} from './Controller/objectContext.js';
-import {isValidCustomerID, isValidCustomerName, isValidPhoneNumber, 
+import {isValidCustomerID, isValidCustomerName, isValidPhoneNumber,
         isValidAddress, isValidIndexWater, isValidWatchID} from './Controller/validateFormat.js';
 import { getCheckCustomer, myList, checkDB_CustomerID} from './Controller/checkDatabase.js';
 
-
-function clearContent(){	
-    document.getElementById('chatbox').innerHTML = '';
-}
 
 const url = new URL(window.location.href);
 const key = url.searchParams.get('key');
 const chatbox = $("#chatbox");
 const userInput = $("#userInput");
 const sendButton = $("#sendButton");
+const clearContent = $("#clear-content");
 const _date = new Date();
+
+clearContent.on("click", () => {
+	chatbox[0].innerHTML = '';
+});
 
 sendButton.on("click", () => {
     const message = userInput.val();
@@ -128,11 +129,11 @@ function validateAndExtractInfo(inputString, _InfoStatus) {
 		else if (isValidPhoneNumber(part)) {
 			temp_phoneNumber = part;
 			//console.log(temp_phoneNumber);
-		} 
+		}
 		else if (isValidCustomerName(part)) {
 			temp_customerName = part;
 			//console.log(temp_customerName);
-		} 
+		}
 		else if(isValidIndexWater(part)){
 			temp_index_water = part;
 			//console.log(temp_index_water);
@@ -145,7 +146,7 @@ function validateAndExtractInfo(inputString, _InfoStatus) {
 			temp_address = part;
 			//console.log(temp_address);
 		}
-		
+
   	}
   	// check value
   	const isValidInfo = {
@@ -166,14 +167,14 @@ function validateAndExtractInfo(inputString, _InfoStatus) {
 	}
 	else if(_InfoStatus == InformationStatus.info_change_information_contract){
 		if ( isValidInfo.customerID || isValidInfo.address || (isValidInfo.customerID && isValidInfo.address)) {
-			
+
     		return isValidInfo;
     	}
 		else {
 			return false;
 		}
 	}
-	
+
 }
 
 function messageUser(input_user){
@@ -183,15 +184,15 @@ function messageUser(input_user){
     };
 }
 
-function messageAssistant(input_assistant, _action="", _category="", _user_id="", _device_id="", 
-						_phone_number="", _user_name="", _address="", _index_value="", _month="", 
+function messageAssistant(input_assistant, _action="", _category="", _user_id="", _device_id="",
+						_phone_number="", _user_name="", _address="", _index_value="", _month="",
 						_year="",_end_conversation=end_conversation, _arrange_response=arrange_response){
 	return {
         "role": "assistant",
-		"content": '{"hành_động":"' + _action + '","phân_loại":"' + _category + '","mã_khách_hàng":"' + _user_id + 
-				   '","số_điện_thoại":"' + _phone_number + '","tên_khách_hàng":"' + _user_name + '","địa_chỉ":"' + 
-				    _address + '","mã_đồng_hồ":"' + _device_id+ '","chỉ_số_nước":"' + _index_value + '","tháng":"' + 
-					_month + '","năm":"' + _year + '","trả_lời":"' + input_assistant + '","kết_thúc":"' + _end_conversation + 
+		"content": '{"hành_động":"' + _action + '","phân_loại":"' + _category + '","mã_khách_hàng":"' + _user_id +
+				   '","số_điện_thoại":"' + _phone_number + '","tên_khách_hàng":"' + _user_name + '","địa_chỉ":"' +
+				    _address + '","mã_đồng_hồ":"' + _device_id+ '","chỉ_số_nước":"' + _index_value + '","tháng":"' +
+					_month + '","năm":"' + _year + '","trả_lời":"' + input_assistant + '","kết_thúc":"' + _end_conversation +
 					'","số_thứ_tự_trả_lời":"' + _arrange_response + '"}'
 	};
 }
@@ -225,7 +226,7 @@ function clearAllContext(){
 }
 
 
-function handle_RemainInformation(ObjContext,_action, _category, _user_id, _device_id, _phone_number, 
+function handle_RemainInformation(ObjContext,_action, _category, _user_id, _device_id, _phone_number,
 								_user_name, _address, _index_value,_month, _year,_end_conversation, _arrange_response){
 	let _result_handle_RemainInformation = "";
 	console.log(_InfoStatus);
@@ -250,13 +251,13 @@ function handle_RemainInformation(ObjContext,_action, _category, _user_id, _devi
 					flag_rememberInformation.reflect_water_quality = false;
 				}
 				else{
-					objectContext["message_history"].push(messageAssistant(result_push, _action, _category, _user_id, _device_id, 
-																			_phone_number, _user_name, _address, _index_value,_month, 
+					objectContext["message_history"].push(messageAssistant(result_push, _action, _category, _user_id, _device_id,
+																			_phone_number, _user_name, _address, _index_value,_month,
 																			_year,end_conversation,arrange_response));
 					arrange_response++;
 				}
 			}
-			
+
 		}
 		else{
 			_result_handle_RemainInformation += "Mã khách hàng không hợp lệ, anh/chị vui lòng kiểm tra lại";
@@ -269,7 +270,7 @@ function handle_RemainInformation(ObjContext,_action, _category, _user_id, _devi
 			_InfoStatus = InformationStatus.done_info_reflect_supply;
 			_result_handle_RemainInformation +=getCheckCustomer(String(_cache_Data["user_id"]), _result_handle_RemainInformation);
 			_result_handle_RemainInformation += "Anh/chị vui lòng cung cấp số điện thoại liên hệ";
-			
+
 		}
 		else{
 			_result_handle_RemainInformation += "Mã khách hàng không hợp lệ, anh/chị vui lòng kiểm tra lại";
@@ -295,12 +296,12 @@ function handle_RemainInformation(ObjContext,_action, _category, _user_id, _devi
 				flag_rememberInformation.request_watch_repair = false;
 			}
 			else{
-				objectContext["message_history"].push(messageAssistant(result_push, _action, _category, _user_id, _device_id, 
-																		_phone_number, _user_name, _address, _index_value,_month, 
+				objectContext["message_history"].push(messageAssistant(result_push, _action, _category, _user_id, _device_id,
+																		_phone_number, _user_name, _address, _index_value,_month,
 																		_year,end_conversation,arrange_response));
 				arrange_response++;
 			}
-			
+
 		}
 		else{
 			_result_handle_RemainInformation += "Mã khách hàng không hợp lệ, anh/chị vui lòng kiểm tra lại";
@@ -326,8 +327,8 @@ function handle_RemainInformation(ObjContext,_action, _category, _user_id, _devi
 				flag_rememberInformation.request_watch_move_lift = false;
 			}
 			else{
-				objectContext["message_history"].push(messageAssistant(result_push, _action, _category, _user_id, _device_id, 
-																		_phone_number, _user_name, _address, _index_value,_month, 
+				objectContext["message_history"].push(messageAssistant(result_push, _action, _category, _user_id, _device_id,
+																		_phone_number, _user_name, _address, _index_value,_month,
 																		_year,end_conversation,arrange_response));
 				arrange_response++;
 			}
@@ -362,7 +363,7 @@ function handle_RemainInformation(ObjContext,_action, _category, _user_id, _devi
 		else{
 			_result_handle_RemainInformation += "Mã khách hàng không hợp lệ, anh/chị vui lòng kiểm tra lại";
 		}
-		
+
 	}
 	else if(_InfoStatus == InformationStatus.info_request_pipe_repair){
 		if(checkDB_CustomerID(_user_id, myList)){
@@ -419,10 +420,10 @@ function handle_RemainInformation(ObjContext,_action, _category, _user_id, _devi
 				let resp = response.choices[0].message.content.trim();
 				resp = resp.replace("tháng", "month");
 				let json_data = JSON.parse(resp);
-				if (json_data["month"] != ""){ 
+				if (json_data["month"] != ""){
 					_month = json_data["month"];
 				}
-			});	
+			});
 			clearObjContext();
 			clearPreviousAction();
 			clearPushContextStatus();
@@ -504,7 +505,7 @@ function handle_RemainInformation(ObjContext,_action, _category, _user_id, _devi
 				objectContext["user_id"] = "";
 			}
 		}
-		
+
 	}
 	else if(_InfoStatus == InformationStatus.info_instruction_IndexWater_report){
 		if(checkDB_CustomerID(_user_id, myList)){
@@ -614,28 +615,28 @@ function handle_RemainInformation(ObjContext,_action, _category, _user_id, _devi
 				_cache_Data["month"] = json_data["month"];
 				objectContext["month"]=json_data["month"];
 			}
-			if (json_data["year"] != ""){ 
+			if (json_data["year"] != ""){
 				_year = json_data["year"];
 				_cache_Data["year"] = json_data["year"];
 				objectContext["year"] = json_data["year"];
 			}
-			if (json_data["response"] != ""){ 
+			if (json_data["response"] != ""){
 				_response = json_data["response"];
 				_result_handle_RemainInformation += _response;
 			}
-			if (json_data["end_conversation"] != ""){ 
+			if (json_data["end_conversation"] != ""){
 				_end_conversation = json_data["end_conversation"];
 				end_conversation = _end_conversation;
 				//_cache_Data["end_conversation"] = json_data["end_conversation"];
 			}
-			if (json_data["arrange_response"] != ""){ 
+			if (json_data["arrange_response"] != ""){
 				_arrange_response = json_data["arrange_response"];
 				arrange_response = arrange_response;
 				//_cache_Data["arrange_response"] =  json_data["arrange_response"];
-			}	
+			}
 			objectContext["message_history"].push(messageAssistant(_result_handle_RemainInformation,_action, _category, _user_id, _device_id, _phone_number, _user_name, _address, _index_value,_month, _year, end_conversation, arrange_response));
 			arrange_response++;
-		});	
+		});
 	}
 	else if(_InfoStatus == InformationStatus.info_change_information_contract){
 		if(checkDB_CustomerID(_user_id, myList)){
@@ -650,13 +651,13 @@ function handle_RemainInformation(ObjContext,_action, _category, _user_id, _devi
 			_result_handle_RemainInformation += "Mã khách hàng không hợp lệ, anh/chị vui lòng kiểm tra lại";
 			clearObjContext();
 		}
-		
+
 	}
 
 	return _result_handle_RemainInformation;
 }
 
-function handle_DoneInformation(ObjContext, _action, _category, _user_id, _device_id, _phone_number, 
+function handle_DoneInformation(ObjContext, _action, _category, _user_id, _device_id, _phone_number,
 								_user_name, _address, _index_value,_month, _year,_end_conversation, _arrange_response){
 	let _result_handle_DoneInformation ="";
 	if (_InfoStatus == InformationStatus.done_info_reflect_quality){
@@ -742,27 +743,27 @@ function handle_DoneInformation(ObjContext, _action, _category, _user_id, _devic
 					_cache_Data["month"] = json_data["month"];
 					objectContext["month"]=json_data["month"];
 				}
-				if (json_data["year"] != ""){ 
+				if (json_data["year"] != ""){
 					_year = json_data["year"];
 					_cache_Data["year"] = json_data["year"];
 					objectContext["year"] = json_data["year"];
 				}
-				if (json_data["response"] != ""){ 
+				if (json_data["response"] != ""){
 					_response = json_data["response"];
 					_result_handle_DoneInformation = _response;
 				}
-				if (json_data["end_conversation"] != ""){ 
+				if (json_data["end_conversation"] != ""){
 					_end_conversation = json_data["end_conversation"];
 					end_conversation = _end_conversation;
 				}
-				if (json_data["arrange_response"] != ""){ 
+				if (json_data["arrange_response"] != ""){
 					_arrange_response = json_data["arrange_response"];
 					arrange_response = arrange_response;
-				}	
+				}
 				objectContext["message_history"].push(messageAssistant(_result_handle_DoneInformation,_action, _category, _user_id, _device_id, _phone_number, _user_name, _address, _index_value,_month, _year, end_conversation, arrange_response));
 				arrange_response++;
-			});		
-		}	
+			});
+		}
 		else{
 			_result_handle_DoneInformation = "Bwaco xin ghi nhận thông tin: Phản ánh chất lượng nước. Thông tin của anh/chị đã được ghi nhận. Sẽ có nhân viên của BWACO liên hệ với anh/chị trong thời gian sớm nhất có thể. Xin cảm ơn!";
 			_InfoStatus = InformationStatus.idle;
@@ -775,7 +776,7 @@ function handle_DoneInformation(ObjContext, _action, _category, _user_id, _devic
 			clearAllContext();
 	}
 	else if(_InfoStatus == InformationStatus.done_info_request_watch_repair){
-		if(_PushContextStatus == PushContextStatus.request_watch_repair){	
+		if(_PushContextStatus == PushContextStatus.request_watch_repair){
 			var chat_ai = {
 				url: "https://api.openai.com/v1/chat/completions" ,
 				method: "POST",
@@ -856,30 +857,30 @@ function handle_DoneInformation(ObjContext, _action, _category, _user_id, _devic
 					_cache_Data["month"] = json_data["month"];
 					objectContext["month"]=json_data["month"];
 				}
-				if (json_data["year"] != ""){ 
+				if (json_data["year"] != ""){
 					_year = json_data["year"];
 					_cache_Data["year"] = json_data["year"];
 					objectContext["year"] = json_data["year"];
 				}
-				if (json_data["response"] != ""){ 
+				if (json_data["response"] != ""){
 					_response = json_data["response"];
 					_result_handle_DoneInformation = _response;
 				}
-				if (json_data["end_conversation"] != ""){ 
+				if (json_data["end_conversation"] != ""){
 					_end_conversation = json_data["end_conversation"];
 					end_conversation = _end_conversation;
 				}
-				if (json_data["arrange_response"] != ""){ 
+				if (json_data["arrange_response"] != ""){
 					_arrange_response = json_data["arrange_response"];
 					arrange_response = arrange_response;
-				}	
+				}
 				objectContext["message_history"].push(messageAssistant(_result_handle_DoneInformation,_action, _category, _user_id, _device_id, _phone_number, _user_name, _address, _index_value,_month, _year, end_conversation, arrange_response));
 				arrange_response++;
 			});
 		}
 	}
 	else if(_InfoStatus == InformationStatus.done_info_request_watch_move_lift){
-		if(_PushContextStatus == PushContextStatus.request_watch_move_lift){	
+		if(_PushContextStatus == PushContextStatus.request_watch_move_lift){
 			var chat_ai = {
 				url: "https://api.openai.com/v1/chat/completions" ,
 				method: "POST",
@@ -960,23 +961,23 @@ function handle_DoneInformation(ObjContext, _action, _category, _user_id, _devic
 					_cache_Data["month"] = json_data["month"];
 					objectContext["month"]=json_data["month"];
 				}
-				if (json_data["year"] != ""){ 
+				if (json_data["year"] != ""){
 					_year = json_data["year"];
 					_cache_Data["year"] = json_data["year"];
 					objectContext["year"] = json_data["year"];
 				}
-				if (json_data["response"] != ""){ 
+				if (json_data["response"] != ""){
 					_response = json_data["response"];
 					_result_handle_DoneInformation = _response;
 				}
-				if (json_data["end_conversation"] != ""){ 
+				if (json_data["end_conversation"] != ""){
 					_end_conversation = json_data["end_conversation"];
 					end_conversation = _end_conversation;
 				}
-				if (json_data["arrange_response"] != ""){ 
+				if (json_data["arrange_response"] != ""){
 					_arrange_response = json_data["arrange_response"];
 					arrange_response = arrange_response;
-				}	
+				}
 				objectContext["message_history"].push(messageAssistant(_result_handle_DoneInformation,_action, _category, _user_id, _device_id, _phone_number, _user_name, _address, _index_value,_month, _year, end_conversation, arrange_response));
 				arrange_response++;
 			});
@@ -992,7 +993,7 @@ function handle_DoneInformation(ObjContext, _action, _category, _user_id, _devic
 			_InfoStatus = InformationStatus.idle;
 			clearPreviousAction();
 		}
-		
+
 	}
 	else if(_InfoStatus == InformationStatus.done_info_request_pipe_repair){
 		if(_PushContextStatus == PushContextStatus.request_pipe_repair){
@@ -1004,12 +1005,12 @@ function handle_DoneInformation(ObjContext, _action, _category, _user_id, _devic
 			_InfoStatus = InformationStatus.idle;
 			clearAllContext();
 		}
-		
+
 	}
 	else if(_InfoStatus == InformationStatus.done_info_request_IndexWatch_check_explain){
 		if(_PushContextStatus == PushContextStatus.request_IndexWatch_check_explain){
 			_result_handle_DoneInformation = "Anh/chị vui lòng kiểm tra sơ bộ hệ thống nước phía sau đồng hồ của nhà mình như sau: khóa van trước đồng hồ lại xem ĐH còn quay không ạ. Trường hợp khóa van trước ĐH lại ĐH không quay, mở ra mặc dù không dùng nước, ĐH vẫn quay thì có khả năng rò rỉ hệ thống nước phía sau ĐH. Đối với hệ thống phía sau ĐH thì Công ty không đủ nhân lực để hỗ trợ, Anh/chị vui lòng liên hệ thợ nước bên ngoài để khắc phục giúp ạ.";
-			_PushContextStatus = PushContextStatus.idle;	
+			_PushContextStatus = PushContextStatus.idle;
 		}
 		else{
 			_result_handle_DoneInformation = "Thông tin của anh/chị đã được ghi nhận. Sẽ có nhân viên của BWACO liên hệ với anh/chị trong thời gian sớm nhất có thể. Trong thời gian đợi nhân viên hỗ trợ anh/chị vui lòng khóa van trước đồng hồ khi không sử dụng nước. Xin cảm ơn!";
@@ -1021,7 +1022,7 @@ function handle_DoneInformation(ObjContext, _action, _category, _user_id, _devic
 		_result_handle_DoneInformation = "Bwaco xin ghi nhận thông tin: Sửa chữa van ống nước. Bạn vui lòng đợi bộ phận phụ trách liên hệ lại trong thời gian sớm nhất có thể. Xin cảm ơn!";
 		_InfoStatus = InformationStatus.idle;
 		clearAllContext();
-	}  
+	}
 	else if(_InfoStatus == InformationStatus.done_info_request_area_refund){
 		_result_handle_DoneInformation = "Dạ phần hoàn trả mặt bằng do bộ phận Trám vá riêng phụ trách, do lượng công việc khá nhiều nên chưa xuống hoàn trả mặt bằng kịp. Rất xin lỗi anh/chị vì sự bất tiện này. Thông tin của anh/chị đã được chuyển đến bộ phận Trám vá. Sẽ có nhân viên của BWACO hỗ trợ anh/chị trong thời gian sớm nhất có thể. Mong anh/chị thông cảm, xin cảm ơn!";
 		_InfoStatus = InformationStatus.idle;
@@ -1133,23 +1134,23 @@ function handle_DoneInformation(ObjContext, _action, _category, _user_id, _devic
 				_cache_Data["month"] = json_data["month"];
 				objectContext["month"]=json_data["month"];
 			}
-			if (json_data["year"] != ""){ 
+			if (json_data["year"] != ""){
 				_year = json_data["year"];
 				_cache_Data["year"] = json_data["year"];
 				objectContext["year"] = json_data["year"];
 			}
-			if (json_data["response"] != ""){ 
+			if (json_data["response"] != ""){
 				_response = json_data["response"];
 				_result_handle_DoneInformation += _response;
 			}
-			if (json_data["end_conversation"] != ""){ 
+			if (json_data["end_conversation"] != ""){
 				_end_conversation = json_data["end_conversation"];
 				end_conversation = _end_conversation;
 			}
-			if (json_data["arrange_response"] != ""){ 
+			if (json_data["arrange_response"] != ""){
 				_arrange_response = json_data["arrange_response"];
 				arrange_response = arrange_response;
-			}	
+			}
 			objectContext["message_history"].push(messageAssistant(_result_handle_DoneInformation,_action, _category, _user_id, _device_id, _phone_number, _user_name, _address, _index_value,_month, _year, end_conversation, arrange_response));
 			arrange_response++;
 		});
@@ -1178,14 +1179,14 @@ function handle_DoneInformation(ObjContext, _action, _category, _user_id, _devic
 				_result_handle_DoneInformation = " Anh/chị vui lòng chuẩn bị hồ sơ đổi tên trên hợp đồng cấp nước gồm (bản photo): Giấy phép hoạt động kinh doanh, CCCD của chủ Doanh nghiệp, Hợp đồng thuê nhà (trên đó có xác nhận của chủ nhà đồng ý cho Công ty mình thay đổi thông tin trên Hóa đơn nước) và Giấy đề nghị thay đổi thông tin (trong đó ghi rõ thông tin hiện tại và thông tin cần thay đổi, có chữ ký của chủ DN và đóng dấu đỏ) . Yêu cầu thay đổi thông tin trên HĐ cấp nước của Anh/chị đã được hệ thống ghi nhận, Anh/chị vui lòng đợi bộ phận chuyên trách liên hệ lại sau. Xin cảm ơn!";
 			}
 			else if(_category == "Đổi số điện thoại hợp đồng doanh nghiệp,công ty" || _category == "Đổi địa chỉ hợp đồng doanh nghiệp,công ty"){
-				_result_handle_DoneInformation = "Yêu cầu thay đổi thông tin trên HĐ cấp nước của Anh/chị đã được hệ thống ghi nhận, Anh/chị vui lòng đợi bộ phận chuyên trách liên hệ lại sau. Xin cảm ơn!";		
+				_result_handle_DoneInformation = "Yêu cầu thay đổi thông tin trên HĐ cấp nước của Anh/chị đã được hệ thống ghi nhận, Anh/chị vui lòng đợi bộ phận chuyên trách liên hệ lại sau. Xin cảm ơn!";
 			}
 			_InfoStatus = InformationStatus.idle;
 			clearAllContext();
 		}
-		
+
 	}
-	
+
 	return _result_handle_DoneInformation;
 }
 
@@ -1193,7 +1194,7 @@ function handle_DoneInformation(ObjContext, _action, _category, _user_id, _devic
 
 function fetchMessages() {
 	if(_InfoStatus == InformationStatus.info_reflect_quality 		  			 || _InfoStatus == InformationStatus.info_reflect_supply 			  	     ||
-	   _InfoStatus == InformationStatus.info_request_watch_repair 	 			|| _InfoStatus == InformationStatus.info_request_pipe_repair 	 		   || 
+	   _InfoStatus == InformationStatus.info_request_watch_repair 	 			|| _InfoStatus == InformationStatus.info_request_pipe_repair 	 		   ||
 	   _InfoStatus == InformationStatus.info_request_valve_repair	 			|| _InfoStatus == InformationStatus.info_request_area_refund 			   ||
 	   _InfoStatus == InformationStatus.info_request_invoices        			|| _InfoStatus == InformationStatus.info_instruction_IndexWater_report     ||
 	   _InfoStatus == InformationStatus.info_request_IndexWater_date 			|| _InfoStatus == InformationStatus.info_request_watch_move_lift   	   	   ||
@@ -1213,14 +1214,14 @@ function fetchMessages() {
 			objectContext["message_history"].push(messageUser(messages));
 		}
 	}
-	else if(_InfoStatus == InformationStatus.done_info_reflect_quality 			 || _InfoStatus == InformationStatus.done_info_reflect_supply					|| 
-			_InfoStatus == InformationStatus.done_info_request_watch_repair     || _InfoStatus == InformationStatus.done_info_request_pipe_repair 		      || 
+	else if(_InfoStatus == InformationStatus.done_info_reflect_quality 			 || _InfoStatus == InformationStatus.done_info_reflect_supply					||
+			_InfoStatus == InformationStatus.done_info_request_watch_repair     || _InfoStatus == InformationStatus.done_info_request_pipe_repair 		      ||
 	   		_InfoStatus == InformationStatus.done_info_request_valve_repair 	|| _InfoStatus == InformationStatus.done_info_request_area_refund 			  ||
 	   		_InfoStatus == InformationStatus.done_info_request_invoices 		|| _InfoStatus == InformationStatus.done_info_request_IndexWatch_check_explain||
 	   		_InfoStatus == InformationStatus.done_info_request_IndexWater_date  || _InfoStatus == InformationStatus.done_info_change_information_contract	  ||
 			_InfoStatus == InformationStatus.done_info_request_watch_move_lift  || _InfoStatus == InformationStatus.done_info_request_watch_box_secure         ){
 		if(isValidPhoneNumber(messages) != false){
-			messages = isValidPhoneNumber(messages);	
+			messages = isValidPhoneNumber(messages);
 			_cache_Data["phone_number_sentence"]= messages;
 			console.log("CACHE PHONE: "+_cache_Data["phone_number_sentence"]);
 		}
@@ -1230,7 +1231,7 @@ function fetchMessages() {
 		// 		console.log("CACHE ADDRESS: "+ messages);
 		// 	}
 		// }
-		
+
 	}
 	else if(_InfoStatus == InformationStatus.info_register_NewWatch_install){
 		let validInfo = validateAndExtractInfo(messages, _InfoStatus);
@@ -1324,7 +1325,7 @@ function fetchMessages() {
 			_cache_Data["month"] = json_data["month"];
 			objectContext["month"]=json_data["month"];
 		}
-		if (json_data["year"] != ""){ 
+		if (json_data["year"] != ""){
 			_year = json_data["year"];
 			_cache_Data["year"] = json_data["year"];
 			objectContext["year"] = json_data["year"];
@@ -1362,7 +1363,7 @@ function fetchMessages() {
 		   _PushContextStatus == PushContextStatus.register_NewWatch_install || _PushContextStatus == PushContextStatus.request_watch_move_lift){
 			objectContext["message_history"].push(messageUser(messages));
 		}
-				
+
 		result_output = "";
 		console.log("Check action: " + _ActionStatus);
 
@@ -1375,7 +1376,7 @@ function fetchMessages() {
                 }
                 else if (_category == "Kết thúc trò chuyện"){
                     result_output = "BWACO tạm biệt quý khách. Cảm ơn anh/chị đã gọi đến tổng đài, cần hỗ trợ thêm thông tin anh/chị vui lòng liên hệ với chúng tôi. Xin cảm ơn!";
-                    
+
                 }
 				clearAllContext();
 				break;
@@ -1394,17 +1395,17 @@ function fetchMessages() {
 							objectContext["message_history"].push(messageFirst_UserID(_action, _category));
 							arrange_response++;
 							flag_rememberInformation.reflect_water_quality = true;
-							result_output = handle_RemainInformation(objectContext ,"Cung cấp thông tin khách hàng", "Thông tin khách hàng", _user_id, _device_id, _phone_number, 
+							result_output = handle_RemainInformation(objectContext ,"Cung cấp thông tin khách hàng", "Thông tin khách hàng", _user_id, _device_id, _phone_number,
 																	_user_name, _address, _index_value,_month, _year, end_conversation, arrange_response);
-							result_output = handle_DoneInformation (objectContext,"Cung cấp thông tin khách hàng", "Thông tin khách hàng", _user_id, _device_id, _phone_number, 
+							result_output = handle_DoneInformation (objectContext,"Cung cấp thông tin khách hàng", "Thông tin khách hàng", _user_id, _device_id, _phone_number,
 																	_user_name, _address, _index_value,_month, _year, end_conversation, arrange_response);
 						}
 						else{
 							_InfoStatus = InformationStatus.done_info_reflect_quality;
-							result_output = handle_DoneInformation (objectContext,_action, _category, _user_id, _device_id, _phone_number, 
+							result_output = handle_DoneInformation (objectContext,_action, _category, _user_id, _device_id, _phone_number,
 																	_user_name, _address, _index_value,_month, _year, end_conversation, arrange_response);
 						}
-						
+
 					}
 					else{
 						result_output = "Anh/chị vui lòng cung cấp mã khách hàng";
@@ -1429,8 +1430,8 @@ function fetchMessages() {
 			case ActionStatus.reflect_water_supply:
 				if(_cache_Data["user_id"] != ""){
 					_InfoStatus = InformationStatus.done_info_reflect_supply;
-					result_output = handle_DoneInformation (objectContext,_action, _category, _user_id, _device_id, _phone_number, 
-									_user_name, _address, _index_value,_month, _year, end_conversation, arrange_response);		
+					result_output = handle_DoneInformation (objectContext,_action, _category, _user_id, _device_id, _phone_number,
+									_user_name, _address, _index_value,_month, _year, end_conversation, arrange_response);
 				}
 				else{
 					result_output = "Anh/chị vui lòng cung cấp mã khách hàng";
@@ -1446,9 +1447,9 @@ function fetchMessages() {
 					objectContext["message_history"].push(messageFirst_UserID(_action, _category));
 					arrange_response++;
 					flag_rememberInformation.request_watch_repair = true;
-					result_output = handle_RemainInformation(objectContext ,"Cung cấp thông tin khách hàng", "Thông tin khách hàng", _user_id, _device_id, _phone_number, 
+					result_output = handle_RemainInformation(objectContext ,"Cung cấp thông tin khách hàng", "Thông tin khách hàng", _user_id, _device_id, _phone_number,
 															_user_name, _address, _index_value,_month, _year, end_conversation, arrange_response);
-					result_output = handle_DoneInformation (objectContext,"Cung cấp thông tin khách hàng", "Thông tin khách hàng", _user_id, _device_id, _phone_number, 
+					result_output = handle_DoneInformation (objectContext,"Cung cấp thông tin khách hàng", "Thông tin khách hàng", _user_id, _device_id, _phone_number,
 															_user_name, _address, _index_value,_month, _year, end_conversation, arrange_response);
 				}
 				else{
@@ -1468,9 +1469,9 @@ function fetchMessages() {
 					objectContext["message_history"].push(messageFirst_UserID(_action, _category));
 					arrange_response++;
 					flag_rememberInformation.request_watch_move_lift = true;
-					result_output = handle_RemainInformation(objectContext ,"Cung cấp thông tin khách hàng", "Thông tin khách hàng", _user_id, _device_id, _phone_number, 
+					result_output = handle_RemainInformation(objectContext ,"Cung cấp thông tin khách hàng", "Thông tin khách hàng", _user_id, _device_id, _phone_number,
 															_user_name, _address, _index_value,_month, _year, end_conversation, arrange_response);
-					result_output = handle_DoneInformation (objectContext,"Cung cấp thông tin khách hàng", "Thông tin khách hàng", _user_id, _device_id, _phone_number, 
+					result_output = handle_DoneInformation (objectContext,"Cung cấp thông tin khách hàng", "Thông tin khách hàng", _user_id, _device_id, _phone_number,
 															_user_name, _address, _index_value,_month, _year, end_conversation, arrange_response);
 				}
 				else{
@@ -1480,15 +1481,15 @@ function fetchMessages() {
 																			 _user_name, _address, _index_value,_month, _year,end_conversation, arrange_response));
 					arrange_response++;
 				}
-				
+
 				break;
 			case ActionStatus.request_watch_box_secure:
 				_PrevActionStatus = ActionStatus.request_watch_box_secure;
 				_PushContextStatus = PushContextStatus.request_watch_box_secure;
 				if(_cache_Data["user_id"] != ""){
 					_InfoStatus = InformationStatus.done_info_request_watch_box_secure;
-					result_output = handle_DoneInformation (objectContext,_action, _category, _user_id, _device_id, _phone_number, 
-									_user_name, _address, _index_value,_month, _year, end_conversation, arrange_response);		
+					result_output = handle_DoneInformation (objectContext,_action, _category, _user_id, _device_id, _phone_number,
+									_user_name, _address, _index_value,_month, _year, end_conversation, arrange_response);
 				}
 				else{
 					result_output = "Anh/chị vui lòng cung cấp mã khách hàng";
@@ -1500,22 +1501,22 @@ function fetchMessages() {
 				_PushContextStatus = PushContextStatus.request_pipe_repair;
 				if(_cache_Data["user_id"] != ""){
 					_InfoStatus = InformationStatus.done_info_request_pipe_repair;
-					result_output = handle_DoneInformation (objectContext,_action, _category, _user_id, _device_id, _phone_number, 
-									_user_name, _address, _index_value,_month, _year, end_conversation, arrange_response);		
+					result_output = handle_DoneInformation (objectContext,_action, _category, _user_id, _device_id, _phone_number,
+									_user_name, _address, _index_value,_month, _year, end_conversation, arrange_response);
 				}
 				else{
 					result_output = "Anh/chị vui lòng cung cấp mã khách hàng";
 					_InfoStatus = InformationStatus.info_request_pipe_repair;
 				}
-				
+
 				break;
 			case ActionStatus.request_IndexWatch_check_explain:
 				_PrevActionStatus = ActionStatus.request_IndexWatch_check_explain;
 				_PushContextStatus = PushContextStatus.request_IndexWatch_check_explain;
 				if(_cache_Data["user_id"] != ""){
 					_InfoStatus = InformationStatus.done_info_request_IndexWatch_check_explain;
-					result_output = handle_DoneInformation (objectContext,_action, _category, _user_id, _device_id, _phone_number, 
-															_user_name, _address, _index_value,_month, _year, end_conversation, arrange_response);		
+					result_output = handle_DoneInformation (objectContext,_action, _category, _user_id, _device_id, _phone_number,
+															_user_name, _address, _index_value,_month, _year, end_conversation, arrange_response);
 				}
 				else{
 					result_output = "Anh/chị vui lòng cung cấp mã khách hàng";
@@ -1525,8 +1526,8 @@ function fetchMessages() {
 			case ActionStatus.request_valve_repair:
 				if(_cache_Data["user_id"] != ""){
 					_InfoStatus = InformationStatus.done_info_request_valve_repair;
-					result_output = handle_DoneInformation (objectContext,_action, _category, _user_id, _device_id, _phone_number, 
-									_user_name, _address, _index_value,_month, _year, end_conversation, arrange_response);		
+					result_output = handle_DoneInformation (objectContext,_action, _category, _user_id, _device_id, _phone_number,
+									_user_name, _address, _index_value,_month, _year, end_conversation, arrange_response);
 				}
 				else{
 					result_output = "Anh/chị vui lòng cung cấp mã khách hàng";
@@ -1536,8 +1537,8 @@ function fetchMessages() {
 			case ActionStatus.request_area_refund:
 				if(_cache_Data["user_id"] != ""){
 					_InfoStatus = InformationStatus.done_info_request_area_refund;
-					result_output = handle_DoneInformation (objectContext,_action, _category, _user_id, _device_id, _phone_number, 
-									_user_name, _address, _index_value,_month, _year, end_conversation, arrange_response);		
+					result_output = handle_DoneInformation (objectContext,_action, _category, _user_id, _device_id, _phone_number,
+									_user_name, _address, _index_value,_month, _year, end_conversation, arrange_response);
 				}
 				else{
 					result_output = "Anh/chị vui lòng cung cấp mã khách hàng";
@@ -1574,7 +1575,7 @@ function fetchMessages() {
 							else{
 								_month = String(_date.getMonth() + 1);
 							}
-							
+
 						}
 						_year = String(_date.getFullYear());
 						console.log("Check month: " +_month);
@@ -1616,23 +1617,23 @@ function fetchMessages() {
 							});
 						});
 					}
-					
+
 				}
-				
+
 				break;
 			case ActionStatus.request_IndexWater_report_input:
 				_PrevActionStatus = ActionStatus.request_IndexWater_report_input;
 				_PushContextStatus = PushContextStatus.request_IndexWater_report_input;
 				if(_cache_Data["user_id"] != ""){
 					_InfoStatus = InformationStatus.done_info_instruction_IndexWater_report_input;
-					result_output = handle_DoneInformation (objectContext,_action, _category, _user_id, _device_id, _phone_number, 
-									_user_name, _address, _index_value,_month, _year, end_conversation, arrange_response);		
+					result_output = handle_DoneInformation (objectContext,_action, _category, _user_id, _device_id, _phone_number,
+									_user_name, _address, _index_value,_month, _year, end_conversation, arrange_response);
 				}
 				else{
 					result_output = "Anh/chị vui lòng cung cấp mã khách hàng";
 				_InfoStatus = InformationStatus.info_instruction_IndexWater_report;
-				}	
-				
+				}
+
 				break;
 			case ActionStatus.instruction_IndexWaterString_input:
 				result_output = "Anh/Chị vui lòng nhập dãy số màu đen trên mặt đồng hồ nước. Xin cảm ơn!";
@@ -1644,8 +1645,8 @@ function fetchMessages() {
 			case ActionStatus.request_IndexWater_date:
 				if(_cache_Data["user_id"] != ""){
 					_InfoStatus = InformationStatus.done_info_request_IndexWater_date;
-					result_output = handle_DoneInformation (objectContext,_action, _category, _user_id, _device_id, _phone_number, 
-									_user_name, _address, _index_value,_month, _year, end_conversation, arrange_response);		
+					result_output = handle_DoneInformation (objectContext,_action, _category, _user_id, _device_id, _phone_number,
+									_user_name, _address, _index_value,_month, _year, end_conversation, arrange_response);
 				}
 				else{
 					result_output = "Anh/chị vui lòng cung cấp mã khách hàng";
@@ -1686,15 +1687,15 @@ function fetchMessages() {
 				break;
 			case ActionStatus.explain_NewWatch_install_fee:
 				if(_PrevActionStatus == ActionStatus.request_watch_repair){
-					result_output = handle_DoneInformation (objectContext,_action, _category, _user_id, _device_id, _phone_number, 
+					result_output = handle_DoneInformation (objectContext,_action, _category, _user_id, _device_id, _phone_number,
 															_user_name, _address, _index_value,_month, _year, end_conversation, arrange_response);
 				}
 				else if(_PrevActionStatus == ActionStatus.request_watch_box_secure) {
-					result_output = handle_DoneInformation (objectContext,_action, _category, _user_id, _device_id, _phone_number, 
+					result_output = handle_DoneInformation (objectContext,_action, _category, _user_id, _device_id, _phone_number,
 															_user_name, _address, _index_value,_month, _year, end_conversation, arrange_response);
 				}
 				else if(_PrevActionStatus == ActionStatus.request_watch_move_lift){
-					result_output = handle_DoneInformation (objectContext,_action, _category, _user_id, _device_id, _phone_number, 
+					result_output = handle_DoneInformation (objectContext,_action, _category, _user_id, _device_id, _phone_number,
 															_user_name, _address, _index_value,_month, _year, end_conversation, arrange_response);
 				}
 				else{
@@ -1705,8 +1706,8 @@ function fetchMessages() {
 				if(_cache_Data["user_id"] != ""){
 					_PushContextStatus = PushContextStatus.change_information_contract;
 					_InfoStatus = InformationStatus.done_info_change_information_contract;
-					result_output = handle_DoneInformation (objectContext,_action, _category, _user_id, _device_id, _phone_number, 
-															_user_name, _address, _index_value,_month, _year, end_conversation, arrange_response);		
+					result_output = handle_DoneInformation (objectContext,_action, _category, _user_id, _device_id, _phone_number,
+															_user_name, _address, _index_value,_month, _year, end_conversation, arrange_response);
 				}
 				else{
 					result_output = "Anh/chị vui lòng cung cấp mã khách hàng";
@@ -1715,12 +1716,12 @@ function fetchMessages() {
 				break;
 			case ActionStatus.provide_customer_information:
 				if (flag_result == false){
-					result_output = handle_RemainInformation(objectContext ,_action, _category, _user_id, _device_id, _phone_number, 
+					result_output = handle_RemainInformation(objectContext ,_action, _category, _user_id, _device_id, _phone_number,
 															_user_name, _address, _index_value,_month, _year, end_conversation, arrange_response);
 					flag_result = true;
 				}
 				else{
-					result_output = handle_DoneInformation (objectContext,_action, _category, _user_id, _device_id, _phone_number, 
+					result_output = handle_DoneInformation (objectContext,_action, _category, _user_id, _device_id, _phone_number,
 															_user_name, _address, _index_value,_month, _year, end_conversation, arrange_response);
 				}
 				//_PrevActionStatus = ActionStatus.provide_customer_information;
@@ -1740,7 +1741,7 @@ function fetchMessages() {
 				}
 				break;
 			case ActionStatus.discuss_information:
-				result_output = handle_DoneInformation(objectContext, _action, _category, _user_id, _device_id, _phone_number, 
+				result_output = handle_DoneInformation(objectContext, _action, _category, _user_id, _device_id, _phone_number,
 														_user_name, _address, _index_value,_month, _year,_end_conversation, _arrange_response);
 
 				break;
@@ -1813,6 +1814,5 @@ function fetchMessages() {
 		chatbox.append(errorMessage);
 		chatbox.animate({ scrollTop: 20000000 }, "slow");
 	});
-	
-}
 
+}
