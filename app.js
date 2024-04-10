@@ -22,7 +22,41 @@ sendButton.on("click", () => {
 		sendButton.val("Đang gửi...");
 		sendButton.prop("disabled", true);
 
-		let result = sendMsg(message);
+		fetchMessage(message);
+	}
+});
+
+userInput.on("keydown", (event) => {
+	if (event.keyCode === 13 && !event.ctrlKey && !event.shiftKey) {
+		event.preventDefault();
+		sendButton.click();
+	} else if (event.keyCode === 13 && (event.ctrlKey || event.shiftKey)) {
+		event.preventDefault();
+		const cursorPosition = userInput.prop("selectionStart");
+		const currentValue = userInput.val();
+
+		userInput.val(
+			currentValue.slice(0, cursorPosition) +
+			"\n" +
+			currentValue.slice(cursorPosition)
+		);
+		userInput.prop("selectionStart", cursorPosition + 1);
+
+		userInput.prop("selectionEnd", cursorPosition + 1);
+	}
+});
+
+function fetchMessage(message_) {
+	var chat_ai = {
+		url: 'http://localhost:51087/wrapper?id=' + _guestId + '&message=' + message_,
+		method: "GET",
+		timeout: 1000,
+		async: false,
+		json:true
+	}
+	$.ajax(chat_ai).done(function (response) {
+		console.log(response)
+		let result = response;
 		const htmlText = window.markdownit().render(result);
 		const botMessageHtml = '<pre><div class="message left-side" id="' + CryptoJS.MD5(htmlText) + '">' + htmlText + '</div><i class="far fa-clipboard ml-1 btn btn-outline-dark" id="' + CryptoJS.MD5(htmlText) + '-copy"></i></pre>';
 
@@ -51,32 +85,11 @@ sendButton.on("click", () => {
 		chatbox.animate({ scrollTop: 20000000 }, "slow");
 		sendButton.val("Gửi");
 		sendButton.prop("disabled", false);
-	}
-});
-
-userInput.on("keydown", (event) => {
-	if (event.keyCode === 13 && !event.ctrlKey && !event.shiftKey) {
-		event.preventDefault();
-		sendButton.click();
-	} else if (event.keyCode === 13 && (event.ctrlKey || event.shiftKey)) {
-		event.preventDefault();
-		const cursorPosition = userInput.prop("selectionStart");
-		const currentValue = userInput.val();
-
-		userInput.val(
-			currentValue.slice(0, cursorPosition) +
-			"\n" +
-			currentValue.slice(cursorPosition)
-		);
-		userInput.prop("selectionStart", cursorPosition + 1);
-
-		userInput.prop("selectionEnd", cursorPosition + 1);
-	}
-});
-
-
-function sendMsg(message_) {
-	let result = message_;
-
-	return result;
+	}).fail(function(jqXHR, textStatus, errorThrown) {
+		sendButton.val("Error");
+		let errorText = "Error: " + jqXHR.responseJSON.error.message;
+		let errorMessage = '<pre><div class="message left-side  text-danger" >' + errorText + '</div></pre>';
+		chatbox.append(errorMessage);
+		chatbox.animate({ scrollTop: 20000000 }, "slow");
+	});
 }
