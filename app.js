@@ -50,7 +50,7 @@ function fetchMessage(message_) {
 	var chat_ai = {
 		url: 'http://lpnserver.net:51087/wrapper?id=' + _guestId + '&message=' + message_,
 		method: "GET",
-		timeout: 1000,
+		timeout: 20000,
 		async: false,
 		json:true
 	}
