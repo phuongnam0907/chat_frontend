@@ -48,7 +48,7 @@ userInput.on("keydown", (event) => {
 
 function fetchMessage(message_) {
 	var chat_ai = {
-		url: 'http://localhost:51087/wrapper?id=' + _guestId + '&message=' + message_,
+		url: 'http://lpnserver.net:51087/wrapper?id=' + _guestId + '&message=' + message_,
 		method: "GET",
 		timeout: 1000,
 		async: false,
